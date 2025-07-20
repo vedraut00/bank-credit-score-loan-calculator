@@ -54,14 +54,18 @@ def ingest_loan_data():
                 start_date = pd.to_datetime(row['Date of Approval']).date()  # type: ignore
                 end_date = pd.to_datetime(row['End Date']).date()  # type: ignore
                 
+                # Round interest rate and monthly payment to 2 decimal places
+                interest_rate = round(float(row['Interest Rate']), 2)
+                monthly_payment = round(float(row['Monthly payment']), 2)
+                
                 loan, created = Loan.objects.get_or_create(  # type: ignore
                     loan_id=row['Loan ID'],
                     defaults={
                         'customer': customer,
                         'loan_amount': Decimal(str(row['Loan Amount'])),
                         'tenure': int(row['Tenure']),
-                        'interest_rate': Decimal(str(row['Interest Rate'])),
-                        'monthly_repayment': Decimal(str(row['Monthly payment'])),
+                        'interest_rate': Decimal(str(interest_rate)),
+                        'monthly_repayment': Decimal(str(monthly_payment)),
                         'emis_paid_on_time': int(row['EMIs paid on Time']),
                         'start_date': start_date,
                         'end_date': end_date,
