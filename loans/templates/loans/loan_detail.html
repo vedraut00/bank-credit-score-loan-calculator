@@ -308,7 +308,7 @@ function checkLoanApproval(loanId) {
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
     $.ajax({
-        url: `/loans/api/loans/${loanId}/approval/`,
+        url: `/loans/api/loan-approval/${loanId}/`,
         method: 'POST',
         headers: {
             'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
@@ -334,7 +334,7 @@ function checkLoanApproval(loanId) {
 
 function fetchCreditScore(customerId) {
     $.ajax({
-        url: `/loans/api/customers/${customerId}/credit-score/`,
+        url: `/loans/api/credit-score/${customerId}/`,
         method: 'POST',
         headers: {
             'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
