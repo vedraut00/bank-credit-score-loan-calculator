@@ -16,10 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 from loans.views import dashboard
+
+def test_view(request):
+    """Simple test view to verify Django is working"""
+    return HttpResponse("Django is working! 🎉")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('loans/', include('loans.urls')),
+    path('test/', test_view, name='test'),
     path('', dashboard, name='home'),
 ]
