@@ -1,5 +1,4 @@
 import pandas as pd
-from celery import shared_task
 from decimal import Decimal
 from datetime import datetime
 from .models import Customer, Loan
@@ -8,11 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@shared_task
 def ingest_customer_data():
-    """Background task to ingest customer data from Excel file"""
+    """Function to ingest customer data from Excel file"""
     try:
-        df = pd.read_excel('/app/customer_data.xlsx')
+        df = pd.read_excel('customer_data.xlsx')
         customers_created = 0
         
         for _, row in df.iterrows():
@@ -42,11 +40,10 @@ def ingest_customer_data():
         return f"Error ingesting customer data: {str(e)}"
 
 
-@shared_task
 def ingest_loan_data():
-    """Background task to ingest loan data from Excel file"""
+    """Function to ingest loan data from Excel file"""
     try:
-        df = pd.read_excel('/app/loan_data.xlsx')
+        df = pd.read_excel('loan_data.xlsx')
         loans_created = 0
         
         for _, row in df.iterrows():
