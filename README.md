@@ -229,4 +229,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ Star this repository if you found it helpful!**
 
-**🔗 [Live Demo](https://bank-credit-score-loan-calculator.vercel.app) | [GitHub Repository](https://github.com/vedraut00/bank-credit-score-loan-calculator)** 
+**🔗 [Live Demo](https://bank-credit-score-loan-calculator.vercel.app) | [GitHub Repository](https://github.com/vedraut00/bank-credit-score-loan-calculator)**
