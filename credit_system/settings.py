@@ -169,3 +169,13 @@ if not DEBUG:
         'https://*.vercel.app',
         'https://*.vercel.app/*'
     ]
+
+# Simplified database configuration for Vercel
+if os.environ.get('VERCEL_ENV'):
+    # Use SQLite for Vercel (serverless doesn't support persistent databases well)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/db.sqlite3',  # Use temp directory
+        }
+    }

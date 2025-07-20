@@ -7,33 +7,13 @@
     ],
     "routes": [
         {
-            "src": "/static/(.*)",
-            "dest": "/static/$1"
-        },
-        {
-            "src": "/media/(.*)",
-            "dest": "/media/$1"
-        },
-        {
-            "src": "/admin/(.*)",
-            "dest": "api/index.py"
-        },
-        {
-            "src": "/api/(.*)",
-            "dest": "api/index.py"
-        },
-        {
             "src": "/(.*)",
             "dest": "api/index.py"
         }
     ],
     "env": {
         "PYTHONPATH": ".",
-        "DJANGO_SETTINGS_MODULE": "credit_system.settings"
-    },
-    "functions": {
-        "api/index.py": {
-            "maxDuration": 30
-        }
+        "DJANGO_SETTINGS_MODULE": "credit_system.settings",
+        "VERCEL_ENV": "production"
     }
 } 
