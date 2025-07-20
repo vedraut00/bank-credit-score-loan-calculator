@@ -68,7 +68,7 @@ A comprehensive full-stack web application for credit analysis and loan approval
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/bank-credit-score-loan-calculator.git
+   git clone https://github.com/vedraut00/bank-credit-score-loan-calculator.git
    cd bank-credit-score-loan-calculator
    ```
 
@@ -207,10 +207,16 @@ This project demonstrates:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 👨‍💻 **Author**
+
+**Ved Raut**
+- GitHub: [@vedraut00](https://github.com/vedraut00)
+- LinkedIn: [Ved Raut](https://linkedin.com/in/vedraut00)
+- Portfolio: [Ved Raut Portfolio](https://vedraut00.github.io)
+
 ## 📝 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 
 ## 🙏 **Acknowledgments**
 
@@ -223,4 +229,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ Star this repository if you found it helpful!**
 
-**🔗 [Live Demo](https://bank-credit-score-loan-calculator.vercel.app) | [GitHub Repository](https://github.com/yourusername/bank-credit-score-loan-calculator)** 
+**🔗 [Live Demo](https://bank-credit-score-loan-calculator.vercel.app) | [GitHub Repository](https://github.com/vedraut00/bank-credit-score-loan-calculator)** 
