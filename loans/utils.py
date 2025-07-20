@@ -5,11 +5,11 @@ import math
 
 
 def calculate_credit_score(customer):
-    """Calculate credit score based on historical data"""
+    """Calculate credit score based on historical data (300-850 range)"""
     loans = Loan.objects.filter(customer=customer)  # type: ignore
     
     if not loans.exists():  # type: ignore
-        return 50  # Default score for new customers
+        return 650  # Default score for new customers
     
     # Component 1: Past loans paid on time (40% weightage)
     total_emis = sum(loan.tenure for loan in loans)
@@ -32,17 +32,36 @@ def calculate_credit_score(customer):
         if loan.end_date > date.today()
     )
     
-    if current_debt > customer.approved_limit:
-        return 0
+    # Base score starts at 300
+    base_score = 300
     
-    # Calculate score (weighted average)
-    score = 0
-    score += on_time_ratio * 40  # 40% weight for payment history
-    score += min(num_loans * 5, 20)  # Up to 20 points for loan history
-    score += min(current_year_loans * 10, 20)  # Up to 20 points for current activity
-    score += min(float(total_loan_amount) / 1000000 * 10, 20)  # Up to 20 points for volume
+    # Calculate score components (max 550 points to reach 850)
+    score = base_score
     
-    return min(max(score, 0), 100)
+    # Payment history (up to 220 points)
+    score += on_time_ratio * 220
+    
+    # Loan history (up to 110 points)
+    score += min(num_loans * 20, 110)
+    
+    # Current activity (up to 110 points)
+    score += min(current_year_loans * 30, 110)
+    
+    # Volume bonus (up to 110 points)
+    score += min(float(total_loan_amount) / 1000000 * 50, 110)
+    
+    # Penalty for high debt utilization
+    if customer.approved_limit > 0:
+        debt_utilization = (current_debt / customer.approved_limit) * 100
+        if debt_utilization > 80:
+            score -= 100
+        elif debt_utilization > 60:
+            score -= 50
+        elif debt_utilization > 40:
+            score -= 25
+    
+    # Ensure score is within valid range
+    return min(max(int(score), 300), 850)
 
 
 def calculate_monthly_installment(loan_amount, tenure, interest_rate):
@@ -113,7 +132,8 @@ def determine_loan_approval(customer, loan):
     if loan.loan_amount > customer.approved_limit:
         return {
             'approval': 'rejected',
-            'reason': 'Loan amount exceeds approved limit'
+            'reason': f'Loan amount (${loan.loan_amount:,.2f}) exceeds approved limit (${customer.approved_limit:,.2f})',
+            'credit_score': credit_score
         }
     
     # Check debt-to-income ratio
@@ -123,22 +143,26 @@ def determine_loan_approval(customer, loan):
     if dti_ratio > 50:
         return {
             'approval': 'rejected',
-            'reason': 'Debt-to-income ratio too high'
+            'reason': f'Debt-to-income ratio too high ({dti_ratio:.1f}%)',
+            'credit_score': credit_score
         }
     
     # Check credit score
-    if credit_score < 300:
+    if credit_score < 580:
         return {
             'approval': 'rejected',
-            'reason': 'Credit score too low'
+            'reason': f'Credit score too low ({credit_score})',
+            'credit_score': credit_score
         }
-    elif credit_score < 600:
+    elif credit_score < 670:
         return {
             'approval': 'pending',
-            'reason': 'Credit score requires manual review'
+            'reason': f'Credit score requires manual review ({credit_score})',
+            'credit_score': credit_score
         }
     else:
         return {
             'approval': 'approved',
-            'reason': 'All criteria met'
+            'reason': f'All criteria met. Credit score: {credit_score}',
+            'credit_score': credit_score
         }

@@ -1,3 +1,4 @@
+<!-- Force redeploy: 2024-07-20 23:45:00 -->
 {% extends 'loans/base.html' %}
 
 {% block title %}Loan #{{ loan.loan_id }} - Credit Approval System{% endblock %}
@@ -405,6 +406,8 @@ function showAlert(type, message) {
 
 $(document).ready(function() {
     calculateCustomerMetrics();
+    
+    // Set progress bar width
     const progressBar = document.querySelector('.progress-bar');
     if (progressBar) {
         const progress = parseInt(progressBar.dataset.progress);
@@ -412,6 +415,11 @@ $(document).ready(function() {
         const percentage = total > 0 ? (progress / total) * 100 : 0;
         progressBar.style.width = percentage + '%';
     }
+    
+    // Auto-check loan approval status
+    const loanId = "{{ loan.loan_id }}";
+    checkLoanApproval(loanId);
+    
     // Fetch credit score for this loan's customer
     var customerId = "{{ loan.customer.customer_id|default:0 }}";
     fetchCreditScore(customerId);

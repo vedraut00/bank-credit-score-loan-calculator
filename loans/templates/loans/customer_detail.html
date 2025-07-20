@@ -3,6 +3,9 @@
 {% block title %}{{ customer.first_name }} {{ customer.last_name }} - Credit Approval System{% endblock %}
 
 {% block content %}
+<!-- Add CSRF token for AJAX requests -->
+{% csrf_token %}
+
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -285,7 +288,7 @@ function calculateCreditScore(customerId) {
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Calculating...';
     
     $.ajax({
-        url: `/loans/api/customers/${customerId}/credit-score/`,
+        url: `/loans/api/credit-score/${customerId}/`,
         method: 'POST',
         headers: {
             'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
@@ -297,7 +300,8 @@ function calculateCreditScore(customerId) {
             showAlert('success', `Credit score calculated: ${score}`);
         },
         error: function(xhr) {
-            showAlert('danger', 'Error calculating credit score');
+            console.error('Error:', xhr.responseText);
+            showAlert('danger', 'Error calculating credit score. Please try again.');
         },
         complete: function() {
             // Restore button state
@@ -318,16 +322,22 @@ function updateCreditScoreDisplay(score) {
     circle.className = 'credit-score-circle';
     if (score >= 800) {
         circle.classList.add('excellent');
-        label.textContent = 'Excellent Credit';
-    } else if (score >= 700) {
+        label.textContent = 'Excellent Credit (800-850)';
+    } else if (score >= 740) {
+        circle.classList.add('excellent');
+        label.textContent = 'Very Good Credit (740-799)';
+    } else if (score >= 670) {
         circle.classList.add('good');
-        label.textContent = 'Good Credit';
-    } else if (score >= 600) {
+        label.textContent = 'Good Credit (670-739)';
+    } else if (score >= 580) {
         circle.classList.add('fair');
-        label.textContent = 'Fair Credit';
+        label.textContent = 'Fair Credit (580-669)';
+    } else if (score >= 300) {
+        circle.classList.add('poor');
+        label.textContent = 'Poor Credit (300-579)';
     } else {
         circle.classList.add('poor');
-        label.textContent = 'Poor Credit';
+        label.textContent = 'Very Poor Credit';
     }
 }
 
@@ -362,5 +372,11 @@ function showAlert(type, message) {
         $('.alert').fadeOut();
     }, 3000);
 }
+
+// Auto-calculate credit score on page load
+$(document).ready(function() {
+    const customerId = "{{ customer.customer_id }}";
+    calculateCreditScore(customerId);
+});
 </script>
 {% endblock %} 
