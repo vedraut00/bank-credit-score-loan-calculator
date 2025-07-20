@@ -15,6 +15,5 @@
         "PYTHONPATH": ".",
         "DJANGO_SETTINGS_MODULE": "credit_system.settings",
         "VERCEL_ENV": "production"
-    },
-    "postinstall": "python manage.py migrate"
+    }
 } 
