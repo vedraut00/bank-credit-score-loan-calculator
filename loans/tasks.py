@@ -42,22 +42,26 @@ def ingest_customer_data():
 
 def ingest_loan_data():
     """Function to ingest loan data from Excel file"""
+    required_columns = [
+        'Loan ID', 'Customer ID', 'Loan Amount', 'Tenure', 'Interest Rate',
+        'Monthly payment', 'EMIs paid on Time', 'Date of Approval', 'End Date'
+    ]
     try:
         df = pd.read_excel('loan_data.xlsx')
+        # Check for missing columns
+        missing = [col for col in required_columns if col not in df.columns]
+        if missing:
+            return f"Error: Missing columns in Excel: {', '.join(missing)}"
         loans_created = 0
-        
         for _, row in df.iterrows():
             try:
                 customer = Customer.objects.get(customer_id=row['Customer ID'])  # type: ignore
-                
                 # Convert date strings to datetime objects
                 start_date = pd.to_datetime(row['Date of Approval']).date()  # type: ignore
                 end_date = pd.to_datetime(row['End Date']).date()  # type: ignore
-                
-                # Round interest rate and monthly payment to 2 decimal places
+                # Auto-round decimals to 2 places
                 interest_rate = round(float(row['Interest Rate']), 2)
                 monthly_payment = round(float(row['Monthly payment']), 2)
-                
                 loan, created = Loan.objects.get_or_create(  # type: ignore
                     loan_id=row['Loan ID'],
                     defaults={
@@ -74,14 +78,12 @@ def ingest_loan_data():
                 if created:
                     loans_created += 1
                     logger.info(f"Created loan: {loan.loan_id} for customer {customer.first_name}")
-                    
             except Customer.DoesNotExist:  # type: ignore
                 logger.warning(f"Customer {row['Customer ID']} not found for loan {row['Loan ID']}")
                 continue
             except Exception as e:
                 logger.error(f"Error creating loan {row['Loan ID']}: {str(e)}")
                 continue
-                
         return f"Successfully ingested {loans_created} loans"
     except Exception as e:
         logger.error(f"Error ingesting loan data: {str(e)}")
