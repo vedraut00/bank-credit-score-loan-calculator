@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
+
+def redirect_to_loans(request):
+    """Redirect root URL to loans dashboard"""
+    return redirect('loans:dashboard')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('loans/', include('loans.urls')),
+    path('', redirect_to_loans, name='home'),
 ]
