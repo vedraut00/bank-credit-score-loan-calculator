@@ -12,6 +12,19 @@
     </div>
 </div>
 
+{% if error_message %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Note:</strong> {{ error_message }}
+            <br>
+            <small>This is normal for the initial deployment. Add some data to see the full dashboard.</small>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">

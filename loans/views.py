@@ -18,37 +18,55 @@ from .utils import calculate_credit_score, determine_loan_approval
 
 def dashboard(request):
     """Main dashboard view with system statistics"""
-    # Get basic statistics
-    total_customers = Customer.objects.count()
-    total_loans = Loan.objects.count()
-    total_loan_amount = Loan.objects.aggregate(total=Sum('loan_amount'))['total'] or 0
-    
-    # Recent activities
-    recent_customers = Customer.objects.order_by('-created_at')[:5]
-    recent_loans = Loan.objects.order_by('-created_at')[:5]
-    
-    # Credit score distribution
-    customers_with_scores = []
-    for customer in Customer.objects.all():
-        score = calculate_credit_score(customer)
-        customers_with_scores.append(score)
-    
-    score_distribution = {
-        'excellent': len([s for s in customers_with_scores if s >= 800]),
-        'good': len([s for s in customers_with_scores if 700 <= s < 800]),
-        'fair': len([s for s in customers_with_scores if 600 <= s < 700]),
-        'poor': len([s for s in customers_with_scores if s < 600])
-    }
-    
-    context = {
-        'total_customers': total_customers,
-        'total_loans': total_loans,
-        'total_loan_amount': total_loan_amount,
-        'recent_customers': recent_customers,
-        'recent_loans': recent_loans,
-        'score_distribution': score_distribution,
-    }
-    return render(request, 'loans/dashboard.html', context)
+    try:
+        # Get basic statistics
+        total_customers = Customer.objects.count()
+        total_loans = Loan.objects.count()
+        total_loan_amount = Loan.objects.aggregate(total=Sum('loan_amount'))['total'] or 0
+        
+        # Recent activities
+        recent_customers = Customer.objects.order_by('-created_at')[:5]
+        recent_loans = Loan.objects.order_by('-created_at')[:5]
+        
+        # Credit score distribution
+        customers_with_scores = []
+        for customer in Customer.objects.all():
+            score = calculate_credit_score(customer)
+            customers_with_scores.append(score)
+        
+        score_distribution = {
+            'excellent': len([s for s in customers_with_scores if s >= 800]),
+            'good': len([s for s in customers_with_scores if 700 <= s < 800]),
+            'fair': len([s for s in customers_with_scores if 600 <= s < 700]),
+            'poor': len([s for s in customers_with_scores if s < 600])
+        }
+        
+        context = {
+            'total_customers': total_customers,
+            'total_loans': total_loans,
+            'total_loan_amount': total_loan_amount,
+            'recent_customers': recent_customers,
+            'recent_loans': recent_loans,
+            'score_distribution': score_distribution,
+        }
+        return render(request, 'loans/dashboard.html', context)
+    except Exception as e:
+        # Fallback to simple dashboard if database is not available
+        context = {
+            'total_customers': 0,
+            'total_loans': 0,
+            'total_loan_amount': 0,
+            'recent_customers': [],
+            'recent_loans': [],
+            'score_distribution': {
+                'excellent': 0,
+                'good': 0,
+                'fair': 0,
+                'poor': 0
+            },
+            'error_message': f"Database not available: {str(e)}"
+        }
+        return render(request, 'loans/dashboard.html', context)
 
 
 def customer_list(request):
