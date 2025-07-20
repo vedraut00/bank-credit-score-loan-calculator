@@ -1,14 +1,14 @@
 {
     "builds": [
         {
-            "src": "credit_system/wsgi.py",
+            "src": "api/index.py",
             "use": "@vercel/python"
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "credit_system/wsgi.py"
+            "dest": "api/index.py"
         }
     ],
     "env": {
