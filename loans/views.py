@@ -494,12 +494,15 @@ def api_credit_score(request, customer_id):
     """API endpoint to calculate credit score for a customer"""
     if request.method == 'POST':
         try:
-            customer = get_object_or_404(Customer, customer_id=customer_id)
+            customer = Customer.objects.filter(customer_id=customer_id).first()
+            if not customer:
+                return JsonResponse({'error': 'Customer not found. Please check the Customer ID.'}, status=404)
             credit_score = calculate_credit_score(customer)
+            if credit_score is None:
+                return JsonResponse({'error': 'Could not calculate credit score. Data may be missing or invalid.'}, status=400)
             return JsonResponse({'credit_score': credit_score})
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    
+            return JsonResponse({'error': f'Error calculating credit score: {str(e)}'}, status=400)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
@@ -508,10 +511,13 @@ def api_loan_approval(request, loan_id):
     """API endpoint to check loan approval status"""
     if request.method == 'POST':
         try:
-            loan = get_object_or_404(Loan, loan_id=loan_id)
+            loan = Loan.objects.filter(loan_id=loan_id).first()
+            if not loan:
+                return JsonResponse({'error': 'Loan not found. Please check the Loan ID.'}, status=404)
             approval_status = determine_loan_approval(loan.customer, loan)
+            if not approval_status:
+                return JsonResponse({'error': 'Could not determine approval status. Data may be missing or invalid.'}, status=400)
             return JsonResponse(approval_status)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    
+            return JsonResponse({'error': f'Error checking approval status: {str(e)}'}, status=400)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
