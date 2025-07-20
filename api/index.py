@@ -13,6 +13,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'credit_system.settings')
 import django
 django.setup()
 
+# --- RUN MIGRATIONS ON SERVERLESS START ---
+from django.core.management import call_command
+call_command('migrate', interactive=False)
+
 # Import the WSGI application
 from credit_system.wsgi import application
 
