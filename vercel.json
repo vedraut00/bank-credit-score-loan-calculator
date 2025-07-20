@@ -1,0 +1,17 @@
+{
+    "builds": [
+        {
+            "src": "credit_system/wsgi.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "credit_system/wsgi.py"
+        }
+    ],
+    "env": {
+        "PYTHONPATH": "."
+    }
+} 

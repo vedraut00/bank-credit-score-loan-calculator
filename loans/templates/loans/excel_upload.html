@@ -1,0 +1,292 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}Upload Excel - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-file-excel me-2"></i>
+                Upload Excel Data
+            </h1>
+            <a href="{% url 'loans:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Upload Instructions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Upload Instructions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-users me-2"></i>Customer Data Format</h6>
+                        <ul class="list-unstyled">
+                            <li><small class="text-muted">• First Name (required)</small></li>
+                            <li><small class="text-muted">• Last Name (required)</small></li>
+                            <li><small class="text-muted">• Age (required, 18-100)</small></li>
+                            <li><small class="text-muted">• Phone Number (required)</small></li>
+                            <li><small class="text-muted">• Monthly Salary (required)</small></li>
+                            <li><small class="text-muted">• Approved Limit (required)</small></li>
+                            <li><small class="text-muted">• Current Debt (optional)</small></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-money-bill-wave me-2"></i>Loan Data Format</h6>
+                        <ul class="list-unstyled">
+                            <li><small class="text-muted">• Customer ID (required)</small></li>
+                            <li><small class="text-muted">• Loan Amount (required)</small></li>
+                            <li><small class="text-muted">• Tenure (required, 1-360)</small></li>
+                            <li><small class="text-muted">• Interest Rate (required)</small></li>
+                            <li><small class="text-muted">• Monthly payment (required)</small></li>
+                            <li><small class="text-muted">• EMIs paid on Time (optional)</small></li>
+                            <li><small class="text-muted">• Date of Approval (required)</small></li>
+                            <li><small class="text-muted">• End Date (required)</small></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> The system will automatically detect whether you're uploading customer or loan data based on the column headers in your Excel file.
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                    Upload Excel File
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <i class="fas fa-file-excel fa-3x text-muted mb-3"></i>
+                            <h5>Drag & Drop Excel File Here</h5>
+                            <p class="text-muted">or click to browse</p>
+                            <input type="file" id="excelFile" name="excel_file" accept=".xlsx,.xls" style="display: none;">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('excelFile').click()">
+                                <i class="fas fa-folder-open me-2"></i>
+                                Choose File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="fileInfo" class="mt-3" style="display: none;">
+                        <div class="alert alert-success">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <div>
+                                    <strong id="fileName"></strong>
+                                    <br>
+                                    <small id="fileSize"></small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success w-100" id="uploadBtn" disabled>
+                            <i class="fas fa-upload me-2"></i>
+                            Upload and Process
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sample Templates -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-download me-2"></i>
+                    Sample Templates
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-grid">
+                            <a href="#" class="btn btn-outline-primary" onclick="downloadSample('customers')">
+                                <i class="fas fa-download me-2"></i>
+                                Download Customer Template
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid">
+                            <a href="#" class="btn btn-outline-primary" onclick="downloadSample('loans')">
+                                <i class="fas fa-download me-2"></i>
+                                Download Loan Template
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('excelFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+    
+    // Click to upload
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+    
+    // Form submission
+    $('#uploadForm').on('submit', function(e) {
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            showAlert('warning', 'Please select a file to upload.');
+            return;
+        }
+        
+        // Show loading state
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Uploading...';
+    });
+});
+
+function handleFile(file) {
+    // Validate file type
+    const allowedTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+        showAlert('danger', 'Please select a valid Excel file (.xlsx or .xls)');
+        return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        showAlert('danger', 'File size must be less than 10MB');
+        return;
+    }
+    
+    // Display file info
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('uploadBtn').disabled = false;
+    
+    // Set the file in the input - FIXED VERSION
+    const fileInput = document.getElementById('excelFile');
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+}
+
+function clearFile() {
+    document.getElementById('excelFile').value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = true;
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('.container').prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+
+function downloadSample(type) {
+    // Create sample data with correct column names
+    let csvContent = '';
+    
+    if (type === 'customers') {
+        csvContent = 'First Name,Last Name,Age,Phone Number,Monthly Salary,Approved Limit,Current Debt\n';
+        csvContent += 'John,Doe,30,1234567890,5000.00,10000.00,2000.00\n';
+        csvContent += 'Jane,Smith,25,9876543210,6000.00,12000.00,0.00\n';
+    } else if (type === 'loans') {
+        csvContent = 'Customer ID,Loan Amount,Tenure,Interest Rate,Monthly payment,EMIs paid on Time,Date of Approval,End Date\n';
+        csvContent += '1,5000.00,12,10.5,440.00,6,2024-01-01,2024-12-31\n';
+        csvContent += '2,8000.00,24,9.5,375.00,12,2024-01-01,2025-12-31\n';
+    }
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${type}_template.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %} 

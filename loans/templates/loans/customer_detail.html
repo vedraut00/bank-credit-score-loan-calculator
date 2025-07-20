@@ -1,0 +1,366 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}{{ customer.first_name }} {{ customer.last_name }} - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user me-2"></i>
+                Customer Details
+            </h1>
+            <div class="d-flex gap-2">
+                <a href="{% url 'loans:customer_edit' customer.customer_id %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>
+                    Edit Customer
+                </a>
+                <a href="{% url 'loans:customer_delete' customer.customer_id %}" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Delete Customer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Customer Information -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Customer Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Customer ID:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        <span class="badge bg-primary">#{{ customer.customer_id }}</span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Name:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        {{ customer.first_name }} {{ customer.last_name }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Age:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        {{ customer.age }} years
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Phone:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        <i class="fas fa-phone me-1"></i>
+                        {{ customer.phone_number }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Monthly Salary:</strong>
+                    </div>
+                    <div class="col-sm-8" data-customer-salary="{{ customer.monthly_salary }}">
+                        <i class="fas fa-dollar-sign me-1"></i>
+                        ${{ customer.monthly_salary|floatformat:2 }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Approved Limit:</strong>
+                    </div>
+                    <div class="col-sm-8" data-customer-limit="{{ customer.approved_limit }}">
+                        <i class="fas fa-credit-card me-1"></i>
+                        ${{ customer.approved_limit|floatformat:2 }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Current Debt:</strong>
+                    </div>
+                    <div class="col-sm-8" data-customer-debt="{{ customer.current_debt }}">
+                        <i class="fas fa-balance-scale me-1"></i>
+                        ${{ customer.current_debt|floatformat:2 }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <strong>Member Since:</strong>
+                    </div>
+                    <div class="col-sm-8">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ customer.created_at|date:"F j, Y" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Credit Score and Analysis -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Credit Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="credit-score-display">
+                        <h2 class="mb-2">Credit Score</h2>
+                        <div class="credit-score-circle" id="creditScoreCircle">
+                            <span id="creditScoreValue">--</span>
+                        </div>
+                        <p class="text-muted mt-2" id="creditScoreLabel">Click to calculate</p>
+                    </div>
+                    <button class="btn btn-primary mt-3" data-customer-id="{{ customer.customer_id }}" onclick="calculateCreditScore(this.dataset.customerId)">
+                        <i class="fas fa-calculator me-2"></i>
+                        Calculate Credit Score
+                    </button>
+                </div>
+                
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h6>Debt-to-Income Ratio</h6>
+                            <p class="h4" id="dtiRatio">--</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h6>Credit Utilization</h6>
+                            <p class="h4" id="creditUtilization">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Loans -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Loan History
+                </h5>
+                <a href="{% url 'loans:loan_create' %}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus me-2"></i>
+                    Create New Loan
+                </a>
+            </div>
+            <div class="card-body">
+                {% if loans %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Loan ID</th>
+                                    <th>Amount</th>
+                                    <th>Tenure</th>
+                                    <th>Interest Rate</th>
+                                    <th>Monthly Payment</th>
+                                    <th>EMIs Paid</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in loans %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary">#{{ loan.loan_id }}</span>
+                                    </td>
+                                    <td>${{ loan.loan_amount|floatformat:2 }}</td>
+                                    <td>{{ loan.tenure }} months</td>
+                                    <td>{{ loan.interest_rate }}%</td>
+                                    <td>${{ loan.monthly_repayment|floatformat:2 }}</td>
+                                    <td>{{ loan.emis_paid_on_time }}/{{ loan.tenure }}</td>
+                                    <td>
+                                        {% if loan.emis_paid_on_time >= loan.tenure %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif loan.emis_paid_on_time > 0 %}
+                                            <span class="badge bg-warning">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-info">New</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'loans:loan_detail' loan.loan_id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No loans found</h5>
+                        <p class="text-muted">This customer hasn't taken any loans yet.</p>
+                        <a href="{% url 'loans:loan_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Create First Loan
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.credit-score-display {
+    padding: 20px;
+}
+
+.credit-score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.credit-score-circle.excellent {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.credit-score-circle.good {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.credit-score-circle.fair {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+.credit-score-circle.poor {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calculateCreditScore(customerId) {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Calculating...';
+    
+    $.ajax({
+        url: `/loans/api/customers/${customerId}/credit-score/`,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            const score = response.credit_score;
+            updateCreditScoreDisplay(score);
+            calculateMetrics();
+            showAlert('success', `Credit score calculated: ${score}`);
+        },
+        error: function(xhr) {
+            showAlert('danger', 'Error calculating credit score');
+        },
+        complete: function() {
+            // Restore button state
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    });
+}
+
+function updateCreditScoreDisplay(score) {
+    const circle = document.getElementById('creditScoreCircle');
+    const value = document.getElementById('creditScoreValue');
+    const label = document.getElementById('creditScoreLabel');
+    
+    value.textContent = score;
+    
+    // Update circle class and label based on score
+    circle.className = 'credit-score-circle';
+    if (score >= 800) {
+        circle.classList.add('excellent');
+        label.textContent = 'Excellent Credit';
+    } else if (score >= 700) {
+        circle.classList.add('good');
+        label.textContent = 'Good Credit';
+    } else if (score >= 600) {
+        circle.classList.add('fair');
+        label.textContent = 'Fair Credit';
+    } else {
+        circle.classList.add('poor');
+        label.textContent = 'Poor Credit';
+    }
+}
+
+function calculateMetrics() {
+    // Get customer data from data attributes
+    const customerData = {
+        salary: parseFloat(document.querySelector('[data-customer-salary]').dataset.customerSalary),
+        debt: parseFloat(document.querySelector('[data-customer-debt]').dataset.customerDebt),
+        limit: parseFloat(document.querySelector('[data-customer-limit]').dataset.customerLimit)
+    };
+    
+    // Calculate debt-to-income ratio
+    const dtiRatio = ((customerData.debt / customerData.salary) * 100).toFixed(1);
+    document.getElementById('dtiRatio').textContent = dtiRatio + '%';
+    
+    // Calculate credit utilization
+    const utilization = ((customerData.debt / customerData.limit) * 100).toFixed(1);
+    document.getElementById('creditUtilization').textContent = utilization + '%';
+}
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('.container').prepend(alertHtml);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 3000);
+}
+</script>
+{% endblock %} 

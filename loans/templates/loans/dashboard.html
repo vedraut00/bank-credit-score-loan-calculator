@@ -1,0 +1,285 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}Dashboard - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+                <div>
+                    <h3>{{ total_customers }}</h3>
+                    <p>Total Customers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-money-bill-wave fa-2x"></i>
+                </div>
+                <div>
+                    <h3>{{ total_loans }}</h3>
+                    <p>Total Loans</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-dollar-sign fa-2x"></i>
+                </div>
+                <div>
+                    <h3>${{ total_loan_amount|floatformat:0 }}</h3>
+                    <p>Total Loan Amount</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-chart-line fa-2x"></i>
+                </div>
+                <div>
+                    <h3>{{ score_distribution.excellent|add:score_distribution.good }}</h3>
+                    <p>Good+ Credit Scores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Credit Score Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="creditScoreChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Monthly Loan Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="loanActivityChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Recent Customers
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_customers %}
+                    <div class="list-group list-group-flush">
+                        {% for customer in recent_customers %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ customer.first_name }} {{ customer.last_name }}</h6>
+                                <small class="text-muted">{{ customer.phone_number }}</small>
+                            </div>
+                            <a href="{% url 'loans:customer_detail' customer.customer_id %}" class="btn btn-sm btn-primary">
+                                View
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No customers found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Recent Loans
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_loans %}
+                    <div class="list-group list-group-flush">
+                        {% for loan in recent_loans %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Loan #{{ loan.loan_id }}</h6>
+                                <small class="text-muted">{{ loan.customer.first_name }} {{ loan.customer.last_name }} - ${{ loan.loan_amount }}</small>
+                            </div>
+                            <a href="{% url 'loans:loan_detail' loan.loan_id %}" class="btn btn-sm btn-primary">
+                                View
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No loans found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'loans:customer_create' %}" class="btn btn-success">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Add Customer
+                    </a>
+                    <a href="{% url 'loans:loan_create' %}" class="btn btn-primary">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        Create Loan
+                    </a>
+                    <a href="{% url 'loans:excel_upload' %}" class="btn btn-info">
+                        <i class="fas fa-file-excel me-2"></i>
+                        Upload Excel
+                    </a>
+                    <a href="{% url 'loans:delete_all_data' %}" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-2"></i>
+                        Delete All Data
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Credit Score Distribution Chart
+const creditScoreCtx = document.getElementById('creditScoreChart').getContext('2d');
+const creditScoreChart = new Chart(creditScoreCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Excellent (800+)', 'Good (700-799)', 'Fair (600-699)', 'Poor (<600)'],
+        datasets: [{
+            data: [0, 0, 0, 0], // Will be populated with real data
+            backgroundColor: [
+                '#27ae60',
+                '#3498db',
+                '#f39c12',
+                '#e74c3c'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Loan Activity Chart (Sample data - you can modify this)
+const loanActivityCtx = document.getElementById('loanActivityChart').getContext('2d');
+const loanActivityChart = new Chart(loanActivityCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Loans Created',
+            data: [12, 19, 15, 25, 22, 30],
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Update chart with real data if available
+document.addEventListener('DOMContentLoaded', function() {
+    // This would be populated with real data from the backend
+    const scoreData = {
+        excellent: 0,
+        good: 0,
+        fair: 0,
+        poor: 0
+    };
+    
+    // Update the chart data
+    creditScoreChart.data.datasets[0].data = [
+        scoreData.excellent,
+        scoreData.good,
+        scoreData.fair,
+        scoreData.poor
+    ];
+    creditScoreChart.update();
+});
+</script>
+{% endblock %} 

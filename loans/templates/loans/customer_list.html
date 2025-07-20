@@ -1,0 +1,254 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}Customers - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-users me-2"></i>
+                Customers
+            </h1>
+            <div class="d-flex gap-2">
+                <a href="{% url 'loans:customer_create' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>
+                    Add Customer
+                </a>
+                <a href="{% url 'loans:delete_all_data' %}" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-2"></i>
+                    Delete All Data
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" name="search" 
+                                   placeholder="Search by name or phone number..." 
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customers Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Customer List
+                    {% if search_query %}
+                        <span class="badge bg-secondary ms-2">Filtered</span>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th>Phone</th>
+                                    <th>Monthly Salary</th>
+                                    <th>Approved Limit</th>
+                                    <th>Current Debt</th>
+                                    <th>Credit Score</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in page_obj %}
+                                <tr data-customer-id="{{ customer.customer_id }}">
+                                    <td>
+                                        <span class="badge bg-primary">#{{ customer.customer_id }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ customer.first_name }} {{ customer.last_name }}</strong>
+                                    </td>
+                                    <td>{{ customer.age }}</td>
+                                    <td>{{ customer.phone_number }}</td>
+                                    <td>${{ customer.monthly_salary|floatformat:2 }}</td>
+                                    <td>${{ customer.approved_limit|floatformat:2 }}</td>
+                                    <td>${{ customer.current_debt|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">Calculate</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'loans:customer_detail' customer.customer_id %}" class="btn btn-sm btn-primary" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'loans:customer_edit' customer.customer_id %}" class="btn btn-sm btn-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'loans:customer_delete' customer.customer_id %}" class="btn btn-sm btn-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Customer pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    <!-- Results Summary -->
+                    <div class="text-center text-muted">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} customers
+                    </div>
+                    
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No customers found</h4>
+                        {% if search_query %}
+                            <p class="text-muted">Try adjusting your search criteria</p>
+                            <a href="{% url 'loans:customer_list' %}" class="btn btn-primary">
+                                <i class="fas fa-times me-2"></i>
+                                Clear Search
+                            </a>
+                        {% else %}
+                            <p class="text-muted">Get started by adding your first customer</p>
+                            <a href="{% url 'loans:customer_create' %}" class="btn btn-success">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Add Customer
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calculateCreditScore(customerId) {
+    $.ajax({
+        url: '/loans/api/customers/' + customerId + '/credit-score/',
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            const score = response.credit_score;
+            let badgeClass = 'bg-danger';
+            let scoreClass = 'credit-score-poor';
+            
+            if (score >= 800) {
+                badgeClass = 'bg-success';
+                scoreClass = 'credit-score-excellent';
+            } else if (score >= 700) {
+                badgeClass = 'bg-primary';
+                scoreClass = 'credit-score-good';
+            } else if (score >= 600) {
+                badgeClass = 'bg-warning';
+                scoreClass = 'credit-score-fair';
+            }
+            
+            // Update the credit score badge in the table
+            const row = document.querySelector('tr[data-customer-id="' + customerId + '"]');
+            if (row) {
+                const scoreCell = row.querySelector('td:nth-child(8)');
+                if (scoreCell) {
+                    scoreCell.innerHTML = '<span class="badge ' + badgeClass + ' ' + scoreClass + '">' + score + '</span>';
+                }
+            }
+            
+            // Show success message
+            showAlert('success', 'Credit score calculated: ' + score);
+        },
+        error: function(xhr) {
+            showAlert('danger', 'Error calculating credit score');
+        }
+    });
+}
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('.container').prepend(alertHtml);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 3000);
+}
+</script>
+{% endblock %} 

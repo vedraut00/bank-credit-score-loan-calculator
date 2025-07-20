@@ -1,0 +1,232 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}{{ action }} Customer - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user me-2"></i>
+                {{ action }} Customer
+            </h1>
+            <a href="{% url 'loans:customer_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to List
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    Customer Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="customerForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">
+                                <i class="fas fa-user me-1"></i>
+                                First Name *
+                            </label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   value="{{ customer.first_name|default:'' }}" required>
+                            <div class="form-text">Enter the customer's first name</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">
+                                <i class="fas fa-user me-1"></i>
+                                Last Name *
+                            </label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   value="{{ customer.last_name|default:'' }}" required>
+                            <div class="form-text">Enter the customer's last name</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="age" class="form-label">
+                                <i class="fas fa-birthday-cake me-1"></i>
+                                Age *
+                            </label>
+                            <input type="number" class="form-control" id="age" name="age" 
+                                   value="{{ customer.age|default:'' }}" min="18" max="100" required>
+                            <div class="form-text">Must be between 18 and 100 years</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="phone_number" class="form-label">
+                                <i class="fas fa-phone me-1"></i>
+                                Phone Number *
+                            </label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                   value="{{ customer.phone_number|default:'' }}" required>
+                            <div class="form-text">Enter a valid phone number</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="monthly_salary" class="form-label">
+                                <i class="fas fa-dollar-sign me-1"></i>
+                                Monthly Salary *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="monthly_salary" name="monthly_salary" 
+                                       value="{{ customer.monthly_salary|default:'' }}" step="0.01" min="0.01" required>
+                            </div>
+                            <div class="form-text">Enter the customer's monthly salary</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="approved_limit" class="form-label">
+                                <i class="fas fa-credit-card me-1"></i>
+                                Approved Limit *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="approved_limit" name="approved_limit" 
+                                       value="{{ customer.approved_limit|default:'' }}" step="0.01" min="0.01" required>
+                            </div>
+                            <div class="form-text">Enter the approved credit limit</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="current_debt" class="form-label">
+                                <i class="fas fa-balance-scale me-1"></i>
+                                Current Debt
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="current_debt" name="current_debt" 
+                                       value="{{ customer.current_debt|default:'0.00' }}" step="0.01" min="0">
+                            </div>
+                            <div class="form-text">Enter current outstanding debt (optional)</div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'loans:customer_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            {{ action }} Customer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Form validation
+    $('#customerForm').on('submit', function(e) {
+        let isValid = true;
+        
+        // Clear previous error states
+        $('.form-control').removeClass('is-invalid');
+        $('.invalid-feedback').remove();
+        
+        // Validate required fields
+        $('input[required]').each(function() {
+            if (!$(this).val().trim()) {
+                $(this).addClass('is-invalid');
+                $(this).after('<div class="invalid-feedback">This field is required.</div>');
+                isValid = false;
+            }
+        });
+        
+        // Validate age
+        const age = parseInt($('#age').val());
+        if (age < 18 || age > 100) {
+            $('#age').addClass('is-invalid');
+            $('#age').after('<div class="invalid-feedback">Age must be between 18 and 100.</div>');
+            isValid = false;
+        }
+        
+        // Validate phone number (basic validation)
+        const phone = $('#phone_number').val();
+        if (phone && !/^[\+]?[1-9][\d]{0,15}$/.test(phone.replace(/\s/g, ''))) {
+            $('#phone_number').addClass('is-invalid');
+            $('#phone_number').after('<div class="invalid-feedback">Please enter a valid phone number.</div>');
+            isValid = false;
+        }
+        
+        // Validate salary and limits
+        const salary = parseFloat($('#monthly_salary').val());
+        const limit = parseFloat($('#approved_limit').val());
+        const debt = parseFloat($('#current_debt').val() || 0);
+        
+        if (salary <= 0) {
+            $('#monthly_salary').addClass('is-invalid');
+            $('#monthly_salary').after('<div class="invalid-feedback">Salary must be greater than 0.</div>');
+            isValid = false;
+        }
+        
+        if (limit <= 0) {
+            $('#approved_limit').addClass('is-invalid');
+            $('#approved_limit').after('<div class="invalid-feedback">Approved limit must be greater than 0.</div>');
+            isValid = false;
+        }
+        
+        if (debt < 0) {
+            $('#current_debt').addClass('is-invalid');
+            $('#current_debt').after('<div class="invalid-feedback">Current debt cannot be negative.</div>');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            $('html, body').animate({
+                scrollTop: $('.is-invalid').first().offset().top - 100
+            }, 500);
+        }
+    });
+    
+    // Real-time validation feedback
+    $('.form-control').on('blur', function() {
+        const $input = $(this);
+        const value = $input.val().trim();
+        
+        if ($input.attr('required') && !value) {
+            $input.addClass('is-invalid');
+            if (!$input.next('.invalid-feedback').length) {
+                $input.after('<div class="invalid-feedback">This field is required.</div>');
+            }
+        } else {
+            $input.removeClass('is-invalid');
+            $input.next('.invalid-feedback').remove();
+        }
+    });
+    
+    // Format currency inputs
+    $('input[type="number"]').on('input', function() {
+        const value = parseFloat($(this).val());
+        if (value < 0) {
+            $(this).val(0);
+        }
+    });
+});
+</script>
+{% endblock %} 

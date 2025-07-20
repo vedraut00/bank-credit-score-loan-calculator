@@ -1,0 +1,78 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}Delete Customer - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-user-times me-2"></i>
+                Delete Customer
+            </h1>
+            <a href="{% url 'loans:customer_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Customers
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirm Deletion
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user me-2"></i>Customer Information</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Name:</strong> {{ customer.first_name }} {{ customer.last_name }}</li>
+                            <li><strong>Phone:</strong> {{ customer.phone_number }}</li>
+                            <li><strong>Age:</strong> {{ customer.age }}</li>
+                            <li><strong>Salary:</strong> ${{ customer.monthly_salary|floatformat:2 }}</li>
+                            <li><strong>Approved Limit:</strong> ${{ customer.approved_limit|floatformat:2 }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-money-bill-wave me-2"></i>Impact Analysis</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Loans to Delete:</strong> <span class="badge bg-danger">{{ loan_count }}</span></li>
+                            <li><strong>Created:</strong> {{ customer.created_at|date:"M d, Y" }}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> Deleting this customer will also remove all associated loans from the system.
+                </div>
+                
+                <form method="POST" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>
+                            Delete Customer & All Loans
+                        </button>
+                        <a href="{% url 'loans:customer_detail' customer.customer_id %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

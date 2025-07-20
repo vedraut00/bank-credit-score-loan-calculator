@@ -1,0 +1,84 @@
+{% extends 'loans/base.html' %}
+
+{% block title %}Delete All Data - Credit Approval System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-trash-alt me-2"></i>
+                Delete All Data
+            </h1>
+            <a href="{% url 'loans:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Nuclear Option - Delete All Data
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-radiation me-2"></i>
+                    <strong>CRITICAL WARNING:</strong> This action will permanently delete ALL data from the system!
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-users me-2"></i>Current Data Summary</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Total Customers:</strong> <span class="badge bg-primary">{{ customer_count }}</span></li>
+                            <li><strong>Total Loans:</strong> <span class="badge bg-success">{{ loan_count }}</span></li>
+                            <li><strong>Total Loan Amount:</strong> <span class="badge bg-info">${{ total_loan_amount|floatformat:2 }}</span></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>What Will Be Deleted</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-times text-danger me-2"></i>All customer records</li>
+                            <li><i class="fas fa-times text-danger me-2"></i>All loan records</li>
+                            <li><i class="fas fa-times text-danger me-2"></i>All credit scores</li>
+                            <li><i class="fas fa-times text-danger me-2"></i>All approval data</li>
+                            <li><i class="fas fa-times text-danger me-2"></i>All transaction history</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Important:</strong> This action cannot be undone. Make sure you have backups if needed.
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> Consider using individual delete options instead if you only need to remove specific records.
+                </div>
+                
+                <form method="POST" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Are you absolutely sure you want to delete ALL data? This cannot be undone!')">
+                            <i class="fas fa-trash-alt me-2"></i>
+                            DELETE ALL DATA
+                        </button>
+                        <a href="{% url 'loans:dashboard' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
