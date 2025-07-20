@@ -1,74 +1,48 @@
-# 🏦 Bank Credit Score and Loan Calculator
+# Bank Credit Score Loan Calculator
 
-A comprehensive full-stack web application for credit analysis and loan approval management. Built with Django, featuring real-time credit scoring, Excel data import, and an intuitive user interface. **Fully deployed and accessible worldwide.**
+A Django-based credit approval system that calculates credit scores and loan eligibility based on customer data and loan history.
 
-## 🌟 **Live Demo**
+## 🚀 Live Demo
+**Live Application:** [https://bank-credit-score-loan-calculator.vercel.app](https://bank-credit-score-loan-calculator.vercel.app)
 
-**🚀 [View Live Application](https://bank-credit-score-loan-calculator.vercel.app)**
+## 📋 Features
 
-## ✨ **Features**
+- **Customer Management**: Store and manage customer information
+- **Loan Tracking**: Track loan applications and repayment history
+- **Credit Score Calculation**: Automated credit scoring algorithm
+- **Loan Eligibility**: Determine loan approval based on credit scores
+- **Data Import**: Excel file upload for bulk data ingestion
+- **REST API**: Full API endpoints for integration
+- **Modern UI**: Clean, responsive web interface
 
-### **📊 Dashboard & Analytics**
-- Real-time system statistics
-- Credit score distribution charts
-- Recent activity tracking
-- Quick action buttons
+## 🛠️ Technology Stack
 
-### **👥 Customer Management**
-- Add, edit, and delete customers
-- Bulk import via Excel files
-- Customer search and pagination
-- Detailed customer profiles
-- Credit score calculation
+- **Backend**: Django 4.2.7
+- **Database**: SQLite (development) / PostgreSQL (production)
+- **API**: Django REST Framework
+- **Frontend**: HTML, CSS, JavaScript
+- **Deployment**: Vercel
+- **Static Files**: WhiteNoise
 
-### **💰 Loan Management**
-- Create and manage loans
-- Loan approval status checking
-- Payment tracking and analytics
-- Risk assessment algorithms
+## 📊 Data Models
 
-### **📁 Excel Data Import**
-- Drag & drop file upload
-- Support for customer and loan data
-- Automatic data validation
-- Error handling and feedback
-- Sample templates provided
+### Customer
+- Customer ID, Name, Age, Phone
+- Monthly Salary, Approved Limit
+- Current Debt, Credit Score
 
-### **🗑️ Data Management**
-- Individual record deletion
-- Bulk data cleanup
-- Confirmation dialogs
-- Safe deletion with cascade
+### Loan
+- Loan ID, Amount, Tenure
+- Interest Rate, Monthly Repayment
+- EMIs Paid on Time, Start/End Dates
 
-## 🛠️ **Technologies Used**
+## 🚀 Quick Start
 
-### **Backend**
-- **Django 4.2.7**: Web framework
-- **Django REST Framework**: API endpoints
-- **SQLite/PostgreSQL**: Database
-- **Pandas**: Excel file processing
-- **OpenPyXL**: Excel file handling
-
-### **Frontend**
-- **Bootstrap 5**: Responsive UI framework
-- **Font Awesome**: Icons
-- **Chart.js**: Data visualization
-- **jQuery**: JavaScript interactions
-- **AJAX**: Real-time updates
-
-### **Deployment**
-- **Vercel**: Hosting platform
-- **WhiteNoise**: Static file serving
-- **Gunicorn**: WSGI server
-- **Environment Variables**: Configuration management
-
-## 🚀 **Quick Start**
-
-### **Local Development**
+### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/vedraut00/bank-credit-score-loan-calculator.git
+   git clone https://github.com/ved-raut/bank-credit-score-loan-calculator.git
    cd bank-credit-score-loan-calculator
    ```
 
@@ -82,151 +56,67 @@ A comprehensive full-stack web application for credit analysis and loan approval
    python manage.py migrate
    ```
 
-4. **Start the development server**
+4. **Start development server**
    ```bash
    python manage.py runserver
    ```
 
 5. **Access the application**
+   - Main Dashboard: http://localhost:8000/
+   - Admin Panel: http://localhost:8000/admin/
+
+### Data Import
+
+1. **Place Excel files in project root:**
+   - `customer_data.xlsx` - Customer information
+   - `loan_data.xlsx` - Loan history data
+
+2. **Run data ingestion:**
+   ```bash
+   python manage.py ingest_data
    ```
-   http://localhost:8000/loans/
-   ```
 
-### **Environment Variables**
+## 🔧 API Endpoints
 
-Create a `.env` file in the root directory:
-```env
-DEBUG=True
-SECRET_KEY=your-secret-key-here
-ALLOWED_HOSTS=localhost,127.0.0.1
-```
+- `GET /api/customers/` - List all customers
+- `GET /api/customers/{id}/` - Get customer details
+- `GET /api/loans/` - List all loans
+- `GET /api/loans/{id}/` - Get loan details
+- `POST /api/calculate-credit-score/` - Calculate credit score
 
-## 📁 **Project Structure**
+## 📈 Credit Score Algorithm
 
-```
-bank-credit-score-loan-calculator/
-├── credit_system/          # Django project settings
-├── loans/                  # Main application
-│   ├── models.py          # Database models
-│   ├── views.py           # View functions
-│   ├── urls.py            # URL routing
-│   ├── utils.py           # Credit scoring algorithms
-│   ├── serializers.py     # API serializers
-│   └── templates/         # HTML templates
-├── static/                # Static files (CSS, JS)
-├── requirements.txt       # Python dependencies
-├── vercel.json           # Vercel deployment config
-└── README.md             # This file
-```
-
-## 🎯 **Key Features Explained**
-
-### **Credit Score Calculation**
 The system calculates credit scores based on:
-- Payment history
-- Debt-to-income ratio
-- Credit utilization
-- Loan history
-- Age and income factors
+- **Payment History** (40%): EMIs paid on time
+- **Credit Utilization** (30%): Current debt vs approved limit
+- **Income Stability** (20%): Monthly salary consistency
+- **Loan History** (10%): Previous loan performance
 
-### **Loan Approval Algorithm**
-Loans are approved based on:
-- Credit score threshold
-- Debt-to-income ratio limits
-- Loan amount vs. approved limit
-- Payment history analysis
+## 🎯 Usage
 
-### **Excel Import System**
-- Supports both customer and loan data
-- Automatic column detection
-- Data validation and error handling
-- Progress feedback and success messages
+1. **Import Data**: Upload customer and loan data via Excel files
+2. **View Dashboard**: See overview of customers and loans
+3. **Calculate Scores**: Generate credit scores for customers
+4. **Check Eligibility**: Determine loan approval status
+5. **API Integration**: Use REST endpoints for external systems
 
-## 📊 **Screenshots**
+## 🔒 Security Features
 
-### **Dashboard**
-![Dashboard](screenshots/dashboard.png)
+- CSRF protection enabled
+- Secure headers configured
+- Input validation and sanitization
+- SQL injection prevention
 
-### **Customer Management**
-![Customer List](screenshots/customers.png)
+## 📝 License
 
-### **Excel Upload**
-![Excel Upload](screenshots/excel-upload.png)
+This project is open source and available under the [MIT License](LICENSE).
 
-### **Loan Analysis**
-![Loan Detail](screenshots/loan-detail.png)
-
-## 🔧 **API Endpoints**
-
-### **Credit Score API**
-```
-POST /loans/api/credit-score/{customer_id}/
-```
-
-### **Loan Approval API**
-```
-POST /loans/api/loan-approval/{loan_id}/
-```
-
-### **Customer Data API**
-```
-GET /loans/api/customers/
-```
-
-### **Loan Data API**
-```
-GET /loans/api/loans/
-```
-
-## 🚀 **Deployment**
-
-This application is deployed on **Vercel** for easy access and professional presentation.
-
-### **Deployment Features**
-- ✅ **HTTPS**: Secure connections
-- ✅ **Global CDN**: Fast worldwide access
-- ✅ **Auto-scaling**: Handles traffic spikes
-- ✅ **Custom Domain**: Professional URLs
-- ✅ **Environment Variables**: Secure configuration
-
-## 📈 **Resume Impact**
-
-This project demonstrates:
-- **Full-Stack Development**: Django backend + Bootstrap frontend
-- **Data Processing**: Excel file handling and analysis
-- **Real-time Features**: AJAX updates and calculations
-- **Production Deployment**: Live application on Vercel
-- **User Experience**: Intuitive interface and workflows
-- **Data Management**: CRUD operations and bulk operations
-
-## 🤝 **Contributing**
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 👨‍💻 **Author**
+## 👨‍💻 Author
 
 **Ved Raut**
-- GitHub: [@vedraut00](https://github.com/vedraut00)
-- LinkedIn: [Ved Raut](https://linkedin.com/in/vedraut00)
-- Portfolio: [Ved Raut Portfolio](https://vedraut00.github.io)
-
-## 📝 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 **Acknowledgments**
-
-- Django community for the excellent framework
-- Bootstrap team for the responsive UI components
-- Vercel for the seamless deployment platform
-- All contributors and testers
+- GitHub: [@ved-raut](https://github.com/ved-raut)
+- Project: Bank Credit Score Loan Calculator
 
 ---
 
-**⭐ Star this repository if you found it helpful!**
-
-**🔗 [Live Demo](https://bank-credit-score-loan-calculator.vercel.app) | [GitHub Repository](https://github.com/vedraut00/bank-credit-score-loan-calculator)**
+**Last Updated:** July 20, 2024 - Deployment Fix Applied
