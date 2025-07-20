@@ -305,11 +305,8 @@
 function checkLoanApproval(loanId) {
     const button = event.target;
     const originalText = button.innerHTML;
-    
-    // Show loading state
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
-    
     $.ajax({
         url: `/loans/api/loans/${loanId}/approval/`,
         method: 'POST',
@@ -322,12 +319,36 @@ function checkLoanApproval(loanId) {
             showAlert('success', `Approval status: ${response.approval}`);
         },
         error: function(xhr) {
-            showAlert('danger', 'Error checking approval status');
+            let msg = 'Error checking approval status';
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                msg = xhr.responseJSON.error;
+            }
+            showAlert('danger', msg);
         },
         complete: function() {
-            // Restore button state
             button.disabled = false;
             button.innerHTML = originalText;
+        }
+    });
+}
+
+function fetchCreditScore(customerId) {
+    $.ajax({
+        url: `/loans/api/customers/${customerId}/credit-score/`,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            document.getElementById('creditScore').textContent = response.credit_score;
+        },
+        error: function(xhr) {
+            let msg = 'Error fetching credit score';
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+                msg = xhr.responseJSON.error;
+            }
+            document.getElementById('creditScore').textContent = '--';
+            showAlert('danger', msg);
         }
     });
 }
@@ -338,10 +359,7 @@ function updateApprovalDisplay(response) {
     const label = document.getElementById('approvalStatusLabel');
     const reasonDiv = document.getElementById('approvalReason');
     const reasonText = document.getElementById('reasonText');
-    
     value.textContent = response.approval;
-    
-    // Update circle class and label based on approval status
     circle.className = 'approval-status-circle';
     if (response.approval === 'approved') {
         circle.classList.add('approved');
@@ -353,8 +371,6 @@ function updateApprovalDisplay(response) {
         circle.classList.add('pending');
         label.textContent = 'Under Review';
     }
-    
-    // Show reason if available
     if (response.reason) {
         reasonText.textContent = response.reason;
         reasonDiv.style.display = 'block';
@@ -364,22 +380,14 @@ function updateApprovalDisplay(response) {
 }
 
 function calculateCustomerMetrics() {
-    // Get data from HTML attributes
     const repaymentsElement = document.getElementById('repaymentsLeft');
     const salary = parseFloat(repaymentsElement.dataset.salary);
     const debt = parseFloat(repaymentsElement.dataset.debt);
     const limit = parseFloat(repaymentsElement.dataset.limit);
-    
-    // Calculate debt-to-income ratio
     const dtiRatio = ((debt / salary) * 100).toFixed(1);
     document.getElementById('dtiRatio').textContent = dtiRatio + '%';
-    
-    // Calculate credit utilization
     const utilization = ((debt / limit) * 100).toFixed(1);
     document.getElementById('creditUtilization').textContent = utilization + '%';
-    
-    // Set credit score placeholder (would be calculated from backend)
-    document.getElementById('creditScore').textContent = '--';
 }
 
 function showAlert(type, message) {
@@ -390,18 +398,13 @@ function showAlert(type, message) {
         </div>
     `;
     $('.container').prepend(alertHtml);
-    
-    // Auto-dismiss after 5 seconds
     setTimeout(function() {
         $('.alert').fadeOut();
     }, 5000);
 }
 
-// Calculate metrics on page load
 $(document).ready(function() {
     calculateCustomerMetrics();
-    
-    // Set progress bar width
     const progressBar = document.querySelector('.progress-bar');
     if (progressBar) {
         const progress = parseInt(progressBar.dataset.progress);
@@ -409,6 +412,9 @@ $(document).ready(function() {
         const percentage = total > 0 ? (progress / total) * 100 : 0;
         progressBar.style.width = percentage + '%';
     }
+    // Fetch credit score for this loan's customer
+    var customerId = "{{ loan.customer.customer_id|default:0 }}";
+    fetchCreditScore(customerId);
 });
 </script>
 {% endblock %} 
